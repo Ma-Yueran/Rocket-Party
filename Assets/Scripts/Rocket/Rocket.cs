@@ -7,7 +7,7 @@ public class Rocket : MonoBehaviour
     public float speed;
     public int maxBounce = 5;
     public string hitTag;
-    public Collider2D parentPlayerCollider;
+    public CharacterControl parentCharacter;
 
     private int currentBounce = 0;
     public Collider2D objectCollider;
@@ -32,7 +32,12 @@ public class Rocket : MonoBehaviour
     {
         if (collision.collider.tag == hitTag)
         {
-            collision.collider.GetComponent<CharacterControl>().TakeDamage();
+            CharacterControl hitCharacter = collision.collider.GetComponent<CharacterControl>();
+            hitCharacter.TakeDamage();
+            if (hitCharacter != parentCharacter)
+            {
+                parentCharacter.UpdateScore(1);
+            }
         }
 
         if (currentBounce >= maxBounce)
@@ -51,6 +56,6 @@ public class Rocket : MonoBehaviour
     private IEnumerator EnableColliderAfter(float time)
     {
         yield return new WaitForSeconds(time);
-        Physics2D.IgnoreCollision(parentPlayerCollider, objectCollider, false);
+        Physics2D.IgnoreCollision(parentCharacter.collider, objectCollider, false);
     }
 }

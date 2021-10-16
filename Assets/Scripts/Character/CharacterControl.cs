@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class CharacterControl : MonoBehaviour
 {
@@ -12,17 +13,22 @@ public abstract class CharacterControl : MonoBehaviour
     [SerializeField] protected bool isInvincible = false; // Mutable at runtime
     protected float rocketCooldownTimer = 0.0f;
     
-    public Collider2D objectCollider;
+    public new Collider2D collider;
+
+    private int score = 0;
+    [SerializeField]
+    private Text scoreText;
     
     protected virtual void Start() {
         rigidBody = GetComponent<Rigidbody2D>();
-        objectCollider = GetComponent<Collider2D>();
+        collider = GetComponent<Collider2D>();
     }
     
     public virtual void TakeDamage()
     {
         if (isInvincible) return;
         transform.position = spawnPos.position;
+        UpdateScore(-1);
     }
 
     protected void TickCooldownTimer()
@@ -43,8 +49,17 @@ public abstract class CharacterControl : MonoBehaviour
         var angle = Vector2.SignedAngle(Vector2.up, targetPosition - transform.position);
         var rotation = Quaternion.Euler(0.0f, 0.0f, angle);
         var rocket = Instantiate(rocketClass, transform.position, rotation);
-        rocket.GetComponent<Rocket>().parentPlayerCollider = objectCollider;
-        Physics2D.IgnoreCollision(objectCollider, rocket.GetComponent<Rocket>().objectCollider, true);
+        rocket.GetComponent<Rocket>().parentCharacter = this;
+        Physics2D.IgnoreCollision(collider, rocket.GetComponent<Rocket>().objectCollider, true);
         return true;
+    }
+
+    public void UpdateScore(int change)
+    {
+        score += change;
+        if (scoreText != null)
+        {
+            scoreText.text = "Score: " + score;
+        }
     }
 }
